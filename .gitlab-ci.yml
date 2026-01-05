@@ -1,0 +1,36 @@
+image: golang:latest
+
+before_script:
+  - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+  - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+  - export PATH=$PATH:/go/bin:/root/go/bin:proto/bin
+  - echo $PATH
+  - echo $(which protoc)
+  - echo $(go env GOPATH)
+  - echo $(ls $(go env GOPATH)/bin)
+  - echo $(ls proto/bin/)
+  - apt-get update && apt-get install -y --no-install-recommends protobuf-compiler
+
+stages:
+  - test
+  - build
+
+format:
+  stage: test
+  script:
+    - make protos
+    - (cd client && go fmt $(go list ./... | grep -v /vendor/))
+    - (cd service && go fmt $(go list ./... | grep -v /vendor/))
+    - (cd client && go vet $(go list ./... | grep -v /vendor/))
+    - (cd service && go vet $(go list ./... | grep -v /vendor/))
+    - (cd service && go test -race $(go list ./... | grep -v /vendor/))
+    - (cd client && go test -race $(go list ./... | grep -v /vendor/))
+
+compile:
+  stage: build
+  script:
+    - make client server
+  artifacts:
+    paths:
+      - out
+
