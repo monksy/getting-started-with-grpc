@@ -1,4 +1,4 @@
-# ProductInfo Service/Client exdperiment
+# ProductInfo Service/Client experiment
 
 This is a sample app to experiement with GRPC and get hands on experience.
 
